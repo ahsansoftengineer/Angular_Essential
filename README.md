@@ -73,6 +73,14 @@ export interface AutoComplete{
   page?: number;
   rows?: number;
 }
+export class AutoComplete{
+  url: URLz
+  control: new FormControl('');
+  list?: SelectOption[];
+  temp?: Observable<SelectOption[]>;
+  page?: number;
+  rows?: number;
+}
 ```
 #### Alert
 ```javascript
