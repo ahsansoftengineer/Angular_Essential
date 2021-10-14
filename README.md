@@ -58,6 +58,7 @@ export interface SelectOption{
 ```
 #### AutoComplete
 > * AutoComplete is Also Depons on SelectOption
+> * I think this should be of type class
 ```javascript
 import { FormControl } from "@angular/forms";
 import { Observable } from "rxjs";
