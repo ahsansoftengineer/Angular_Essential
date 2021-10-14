@@ -1,66 +1,50 @@
-## Base Validator
-> 1. Inject FormBuilder
-> 2. Inject Toastr Service for Server Validation
-> 3. Must has _fb FormBuilder Property
-> 4. Must has _form FormGroup Property
-> 5. Must has _toastr Toastr Property
-> 6. File Must Distributed in two
-> *  BaseFormValidator
-> *  BaseFormValidatorMsg
-#### Imports
-```javascript
 import { Injector } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ValidationErrors } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  ValidationErrors,
+} from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { GlobalConfig, ToastrService } from 'ngx-toastr';
+import { Alert } from '../interface/alert';
 import { Server_Response } from '../interface/errors';
 import { ImgType } from '../interface/img-type';
-import { Alpha, AlphaNum, Email, Num, Password, specialChars, } from './base.constants';
-```
-#### Properties
-```javascript
+import {
+  Alpha,
+  AlphaNum,
+  Email,
+  Num,
+  Password,
+  specialChars,
+} from './base.constants';
+
+// In Base Class append all the properties / methods with _ (underscore)
 export abstract class BaseFormValidator {
+  // This Property Initialized by Components
   _form: FormGroup;
-  _submitted = false;
+  // protected formSubmitted: boolean = false;
+  _submitted: boolean = false;
+  _isFormValid: boolean = false;
   _fb: FormBuilder;
   _toastr:ToastrService
   _options: GlobalConfig;
-```
-#### Constructor
-> * Inject FormBuilder
-> * Inject Toastr Service
-```javascript
   constructor(protected injector: Injector) {
     this._fb = injector.get(FormBuilder);
     this._toastr = injector.get(ToastrService)
   }
-```
-## 1. To Display Error Messages
-#### FormGroup
-> * Other than FormGroup Controls
-```javascript
+  _error_control(control : FormControl){
+    if(control.errors){
+      return control?.errors['ERROR']
+    } else return null
+  }
   _error(name: string): ValidationErrors {
     let control = this._form?.controls[name]
     if (control?.touched && control.errors) {
       return control.errors['ERROR'];
     };
   }
-```
-#### FormControl
-> * Other than FormGroup Controls
-```javascript
-  _error_control(control : FormControl){
-    if(control.errors){
-      return control?.errors['ERROR']
-    } else return null
-  }
-```
-#### Custom Image Control
-> * Other than FormGroup Controls
-> * Image Type
-> * Image Required
-> * Image Size ???
-```javascript
   _error_image(img: ImgType){
     if(img.error === true){
       return 'Only jpeg | jpg | png allowed'
@@ -69,18 +53,9 @@ export abstract class BaseFormValidator {
     }
     else return ''
   }
-```
-#### Server Validator in Toastr
-> * Depends on Server Response Type
-> * HttpErrorResponse
-> * Server_Response
-> * Server_Errors
-> * Error_Detail_Server
-> * Error_Internal
-```javascript
   _error_server(server_response: Server_Response){
     server_response.errors.forEach(error => {
-      this.toastr
+      this._toastr
       .error(
         error.detail[0].message,
         this.toTitleCase(error.field_name)
@@ -99,35 +74,12 @@ export abstract class BaseFormValidator {
     } else return 'No Property Provided'
 
   }
-  // Comming Form BaseSubmit Method
-  (httpErrorResponse: HttpErrorResponse) => {
-          this._error_server(httpErrorResponse.error);
-        }
-```
-#### Theme Validator in Alert
-> * Theme Error Handler
-```javascript
-  _error_modify(error: any) {
-    error.error.errors?.forEach((err, i) => {
-      this._alerts.push(err.detail[0]);
-      this._isFormValid = false;
-    });
-    setTimeout(() => {
-      this._alerts = [];
-    }, 4000);
-  }
-```
-#### Internal FormGroup in FormArray Error
-```javascript
   _error_FormArray(internalGroup: FormGroup, control: string){
     let controlz = internalGroup?.get(control)
     if (controlz?.errors) {
       return controlz.errors['ERROR']
     } else return null
   }
-```
-#### Internal FormGroup without FormArray Error
-```javascript
   _error_FormGroupName(group: string, control: string) {
     let fg = this._form?.get(group) as FormGroup;
     let controlz = fg?.get(control)
@@ -135,24 +87,22 @@ export abstract class BaseFormValidator {
       return fg.get(control)?.errors['ERROR'];
     } return null
   }
-```
-## 2. To Add Validation on Fields
-#### Global Validator (Single Field)
-> Full Fills the Following Requirement
-> 1. Required Name Display
-> 2. Is Filed / Select Option
-> 3. Minimum
-> 4. Maximum
-> 6. Only Numeric
-> 7. Only Alphabets
-> 8. Alphabets and Numeric
-> 9. No Special Character except - [space] .
-> 10. Email abc@domain.xyz
-> 11. Password Special Character, Numeric, Small / Capital Alphabets
-> 12. Minimum Value Numeric
-> 13. Maximum Value Numeric
-```javascript
- _validator(
+  /**
+    Global Validator
+    1. Required Name Display
+    2. Is Filed / Select Option
+    3. Minimum
+    4. Maximum
+    6. Only Numeric
+    7. Only Alphabets
+    8. Alphabets and Numeric
+    9. No Special Character except - [space] .
+    10. Email abc@domain.xyz
+    11. Password Special Character, Numeric, Small / Capital Alphabets
+    12. Minimum Value Numeric
+    13. Maximum Value Numeric
+  */
+  _validator(
     field_name: string = '',
     isField: number = 1,
     min: number = 0,
@@ -256,11 +206,8 @@ export abstract class BaseFormValidator {
       }
     };
   }
-```
-#### FormGroup in FormArray (Double Field)
-> * Same Data Does not Repeated Twice in FormArray
-```javascript
-_groupValidator(field1: string, field2: string, arrayName: string) {
+  // Only for Customization
+  _groupValidator(field1: string, field2: string, arrayName: string) {
     return (
       group: FormGroup
     ): {
@@ -292,10 +239,6 @@ _groupValidator(field1: string, field2: string, arrayName: string) {
         return null};
     };
   }
-```
-#### Password Validator
-> * Two Fields Doesn't Match
-```javascript  
   _passwordMatchValidator(field1: string, field2: string) {
     return (
       group: FormGroup
@@ -338,4 +281,3 @@ _groupValidator(field1: string, field2: string, arrayName: string) {
     };
   }
 }
-```
