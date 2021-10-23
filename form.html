@@ -1,0 +1,30 @@
+<div class="row">
+  <div class="col-sm-12 col-lg-12">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title">
+          {{ !_activeId ? "Add" : "Edit" }} Component Name
+        </h2>
+      </div>
+      <form [formGroup]="_form" (ngSubmit)="_onSubmit()">
+        <div class="row card-body">
+          <div class="col-md-4 p-0">
+            <mat-form-field appearance="outline" class="col-md-12">
+              <mat-label>Place Title</mat-label>
+              <input matInput required formControlName="title" type="text">
+              <mat-error> {{ _error('title')?.message }}</mat-error>
+            </mat-form-field>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="action-form">
+            <div class="form-group m-b-0 text-right">
+              <button type="submit" class="btn btn-info waves-effect waves-light">Save</button>
+              <button type="button" (click)="_switch()" class="btn btn-info waves-effect waves-light">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
