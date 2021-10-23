@@ -1,0 +1,85 @@
+<div class="row">
+  <div class="col-sm-12 col-lg-12">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title">
+          {{ !_activeId ? "Add" : "Edit" }} Component Name
+        </h2>
+      </div>
+      <hr>
+      <form [formGroup]="_form" (ngSubmit)="_onSubmit()" autocomplete="off">
+        <div class="row card-body">
+          <div class="col-md-4 p-0">
+            <mat-form-field appearance="outline" class="col-md-12">
+              <mat-label>Law Referene</mat-label>
+              <input matInput type="text" formControlName="law">
+              <mat-error>
+                {{ _error('law')?.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-md-8 p-0">
+            <mat-form-field appearance="outline" class="col-md-12">
+              <mat-label>Address</mat-label>
+              <input matInput type="text" formControlName="address">
+              <mat-error> {{ _error('address')?.message }}</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-md-12 p-0">
+            <mat-slide-toggle
+            formControlName="is_deposit" class="col-md-12 pt-3">
+            Required Bank Cash Deposit for DCO
+          </mat-slide-toggle>
+            <p class="pl-3 pt-2" style="font-size: 10px; color: #f44336;">
+              {{ _error('is_deposit')?.message }}
+            </p>
+          </div>
+          <div class="col-12 pb-3">
+            <div class="row">
+              <div class="col-md-3">
+                <p>Logo</p>
+                <img alt="logo" class="img-fluid" [src]="imgLogo.link ? imgLogo.link : imgPath">
+                <input class="upload-large" type="file" (change)="readUrl($event, imgLogo)">
+                <p style="font-size: 10px; color: #f44336;">
+                  {{ _error_image(imgLogo) }}
+                </p>
+              </div>
+              <div class="col-md-3">
+                <p>Top Image</p>
+                <img alt="Top Image" class="img-fluid" [src]="imgTop.link ? imgTop.link : imgPath">
+                <input class="upload-large" type="file" (change)="readUrl($event,imgTop)">
+                <p style="font-size: 10px; color: #f44336;">
+                  {{ _error_image(imgTop) }}
+                </p>
+              </div>
+              <div class="col-md-3">
+                <p>Warning Image</p>
+                <img alt="logo" class="img-fluid" [src]="imgWarn.link ? imgWarn.link : imgPath">
+                <input class="upload-large" type="file" (change)="readUrl($event, imgWarn)">
+                <p style="font-size: 10px; color: #f44336;">
+                  {{ _error_image(imgWarn) }}
+                </p>
+              </div>
+              <div class="col-md-3">
+                <p>Footer Image</p>
+                <img alt="Footer Image" class="img-fluid" [src]="imgFooter.link ? imgFooter.link : imgPath">
+                <input class="upload-large" type="file" (change)="readUrl($event, imgFooter)">
+                <p style="font-size: 10px; color: #f44336;">
+                  {{ _error_image(imgFooter) }}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="action-form">
+            <div class="form-group m-b-0 text-right">
+              <button type="submit" class="btn btn-info waves-effect waves-light">Save</button>
+              <button type="button" (click)="_switch()" class="btn btn-info waves-effect waves-light">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
