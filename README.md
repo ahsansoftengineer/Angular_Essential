@@ -33,6 +33,7 @@ export class Component extends BaseFormDropDown implements OnInit {
   ngOnInit() {
     this._pathLocation = '/path/location';
     this.initForm();
+    this.initDropDown();
     this._activeId = this._activeRoute.snapshot.paramMap.get('id');
     if (this._activeId) {
       this.patchData();
@@ -66,6 +67,17 @@ export class Component extends BaseFormDropDown implements OnInit {
     });
   }
 ```
+### Intializing Drop Downs
+```javascript
+  initDropDown() {
+    this._dropdown(URLz.SYSTEM).subscribe(
+      (res) => (this.__ddl.system_id = res.data.records)
+    );
+    this._dropdown(URLz.ORG).subscribe(
+      (res) => (this.__ddl.organisation_id = res.data.records)
+    );
+  }
+```
 ### TS Changes to Implement Form Array
 #### 1 Customization (Initialization)
 > * Adding No Repeat Validator
@@ -79,7 +91,7 @@ export class Component extends BaseFormDropDown implements OnInit {
         prefix: ['', this._validator('Prefix')],
       },
       {
-        validators: this._groupValidator(
+        validators: this._duplicate_FormArray_FormGroup_Validator(
           'organisation_id',
           'system_id',
           'customization'
@@ -126,12 +138,12 @@ export class Component extends BaseFormDropDown implements OnInit {
     });
   }
 ```
-#### Validate Duplicate Form Array
+#### 6 Validate Duplicate Form Array
 > * Currently This Validator is only Working on 2 Fields
 > * But this Validator can Extends as Required
 ```javascript
   // Stop Duplication of FormGroup in FormArray
-  _groupValidator(field1: string, field2: string, arrayName: string) {
+  _duplicate_FormArray_FormGroup_Validator(field1: string, field2: string, arrayName: string) {
     return (
       group: FormGroup
     ): {
@@ -164,7 +176,20 @@ export class Component extends BaseFormDropDown implements OnInit {
   }
 
 ```
-#### Customization Template
+#### 7 Error Message Display
+> * This Validator for Both
+> 1. Fields Error
+> 2. Group Duplicate Value Error
+> 3. Could also display other errors like (min, max etc...)
+```javascript
+  _error_FormArray(internalGroup: FormGroup, control: string){
+    let controlz = internalGroup?.get(control)
+    if (controlz?.errors) {
+      return controlz.errors['ERROR']
+    } else return null
+  }
+```
+#### 8 Customization Template
 > * Conditionally (Add / Remove) is Conditionally (Hide / Show)
 ```html
 <div class="col-12">
@@ -215,17 +240,4 @@ export class Component extends BaseFormDropDown implements OnInit {
     </div>
   </div>
 </div>
-```
-#### Error Message Display
-> * This Validator for Both
-> 1. Fields Error
-> 2. Group Duplicate Value Error
-> 3. Could also display other errors like (min, max etc...)
-```javascript
-  _error_FormArray(internalGroup: FormGroup, control: string){
-    let controlz = internalGroup?.get(control)
-    if (controlz?.errors) {
-      return controlz.errors['ERROR']
-    } else return null
-  }
 ```

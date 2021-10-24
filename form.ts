@@ -20,6 +20,7 @@ export class Component extends BaseFormDropDown implements OnInit {
   ngOnInit() {
     this._pathLocation = '/path/location';
     this.initForm();
+    this.initDropDown();
     this._activeId = this._activeRoute.snapshot.paramMap.get('id');
     if (this._activeId) {
       this.patchData();
@@ -45,7 +46,14 @@ export class Component extends BaseFormDropDown implements OnInit {
         this.patchCustomization(data.customization);
     });
   }
-
+  initDropDown() {
+    this._dropdown(URLz.SYSTEM).subscribe(
+      (res) => (this.__ddl.system_id = res.data.records)
+    );
+    this._dropdown(URLz.ORG).subscribe(
+      (res) => (this.__ddl.organisation_id = res.data.records)
+    );
+  }
   // 1 Customization (Initialization)
   customization(): FormGroup {
     return this._fb.group(
