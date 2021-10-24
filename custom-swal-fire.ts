@@ -10,7 +10,7 @@ import { environment } from 'src/environments/environment';
   templateUrl: './org-list.component.html',
   styleUrls: ['./org-list.component.css']
 })
-export class OrgListComponent extends BaseListDropDown implements OnInit {
+export class Component extends BaseListDropDown implements OnInit {
   constructor(
     public injector: Injector,
     protected orgService: BaseService<Organaization>
