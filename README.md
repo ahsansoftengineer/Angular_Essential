@@ -6,27 +6,20 @@
 > * This method could also be use to add a Form Data Property to a Json Object where you can use the parent key property
 > * This method is very flexible
 > * May could be replace with Node packages in future
-#### 1. Checking Type Object
-```javascript
-  private static isObject(val) {
-    return !this.isArray(val) && typeof val === 'object' && !!val;
-  }
-```
-#### 2. Checking Array Type
-```javascript
-  private static isArray(val) {
-    const toString = {}.toString;
-    return toString.call(val) === '[object Array]';
-  }
-
-```
-#### 3. Conversion Method
-> Parameters
+#### 1. Conversion Method FormGroup to FormData
+> * Parameters
 > 1. Json Object
 > 2. Parent Key (Optional)
 > 3. Carry Form Data
 ```javascript
-  public static jsontoFormData(
+  private static isObject(val) {
+    return !this.isArray(val) && typeof val === 'object' && !!val;
+  }
+  private static isArray(val) {
+    const toString = {}.toString;
+    return toString.call(val) === '[object Array]';
+  }
+   public static jsontoFormData(
     jo: Object, // Json Object
     pk = '', // Parent Key
     carryFormData: FormData
@@ -63,8 +56,7 @@
     return formData;
   }
 ```
-#### Utilization
-1. Initializing Form
+#### 2. Initializing Form
 ```javascript
   initForm() {
     this._form = this._fb.group({
@@ -74,7 +66,7 @@
     });
   }
 ```
-2. Declaring Properties
+#### 3. Declaring Properties
 ```javascript
  // Images Access
   imgTop: ImgType = {display: 'Top Image'};
@@ -83,7 +75,7 @@
   imgFooter: ImgType = {display: 'Footer Image'} ;
   imgPath: string = 'assets/images/select.png';
 ```
-3. Patching Images if exsist in Database
+#### 4. Patching Images if exsist in Database
 ```javascript
   patchData() {
     this._service.getByCode(this._activeId).subscribe((res: any) => {
@@ -100,14 +92,14 @@
     });
   }
 ```
-4. Event Handling to Upload Images
+#### 5. Event Handling to Upload Images
 ```javascript
   // Here we are using Custom Image Selector
   readUrl(event: any, imgType: ImgType) {
    Custom.imageSelector(event, imgType)
   }
 ```
-5. Sumitting Form Data to Server
+#### 6. Sumitting Form Data to Server
 ```javascript
  _onSubmit(id: string = 'id') {
     this._form.markAllAsTouched()
@@ -146,10 +138,6 @@
     }
   }
 ```
-1. Initializing Form
-```javascript
-```
-
 ### Object to URL Query Conversion
 > Simple Object to URL Query Converter
 ```javascript
@@ -200,7 +188,6 @@
   <td mat-cell *matCellDef="let item"> {{item.title}} </td>
 </ng-container>
 ```
-
 ### Image Selector Customized Method
 > * This image Selector has following feature
 > * Image Type (jpg, jpge & png)
@@ -341,7 +328,6 @@ patchData() {
   </div>
 </div>
 ```
-
 ### Hiarchecal Dropdowns
 #### 1. Loading Parent Dropdown From Base Class
 ```javascript
