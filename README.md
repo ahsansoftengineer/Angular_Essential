@@ -20,7 +20,7 @@
     const toString = {}.toString;
     return toString.call(val) === '[object Array]';
   }
-  
+
 ```
 ##### 3. Conversion Method
 > Parameters
@@ -165,7 +165,7 @@
   }
 ```
 ##### Utilization
-1. Declaring Properties 
+1. Declaring Properties
 ```javascript
   _search: any = {};
 ```
@@ -505,23 +505,97 @@ ngOnInit() {
   </mat-form-field>
 </div>
 ```
-#### Utilizing Image Selector in TSC
-> * Patch Data
+#### Swal Fire
+> * Custom Swal Fire
+> 1. Status Changed
+> 2. Delete
 ```javascript
+  public static async SwalFireDelete(
+    service: any,
+    class_name: string,
+    id: number
+  ) {
+    return Swal.fire({
+      title: 'Are you sure?',
+      text: class_name + ' will be deleted!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        service.delete(id).subscribe((response: any) => {
+          Custom.statusEmmit.emit('done');
+          Swal.fire(
+            'Deleted!',
+            class_name + ' deleted successfully',
+            'success'
+          );
+        });
+      } else {
+        Custom.statusEmmit.emit('not deleted');
+      }
+    });
+  }
+  public static async SwalFireStatusChange(
+    service: any,
+    status: any,
+    class_name: string = 'Class'
+  ) {
+    let statuss = status.activate == 0 ? false : true;
+    Swal.fire({
+      title: 'Are you sure?',
+      text: class_name + ' will be ' + (statuss ? 'Activated' : 'Deactivated'),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        service.status(status).subscribe((res: any) => {
+          Swal.fire(
+            status.activate ? 'Activated!' : 'Deactivated!',
+            res.message
+          );
+          Custom.statusEmmit.emit('done');
+        });
+      } else {
+        Custom.statusEmmit.emit(status);
+      }
+    });
+  }
 ```
-#### Utilizing Image Selector in TSC
-> * Patch Data
+##### Base Class
+> * There is no role for Child Class TS File
+> * Template is Directly Invoking these Methods
 ```javascript
+  _statusChange(value: boolean, id: number) {
+    this._status.activate = +value;
+    this._status.id = id;
+    Custom.SwalFireStatusChange(
+      this._service, this._status, this._component
+    );
+  }
+  _delete(id: number) {
+    Custom.SwalFireDelete(this._service, this._component, id);
+  }
 ```
-#### Utilizing Image Selector in TSC
-> * Patch Data
-```javascript
+##### Component Templete Implementations
+> * Status Change
+> * Delete
+```html
+  <!-- Status Changed -->
+  <td mat-cell *matCellDef="let item">
+    <ui-switch color="green" size="small" [(ngModel)]="item.activate"
+      (change)="_statusChange($event, item.id)">
+    </ui-switch>
+  </td>
+  <!-- Delete -->
+  <td class="pl-3" mat-cell *matCellDef="let item">
+  <i class="ti-trash text-danger px-2 pointer" (click)="_delete(item.id)"></i>
+</td>
 ```
-#### Utilizing Image Selector in TSC
-> * Patch Data
-```javascript
-```
-#### Utilizing Image Selector in TSC
-> * Patch Data
-```javascript
-```
+##### Note
+> * Custom Class will be convert into service later on
