@@ -185,7 +185,7 @@ patchData() {
    Custom.imageSelector(event, imgType)
   }
 ```
-4.  Submit Event
+4. Submit Event
 ```javascript
   _onSubmit(id: string = 'id') {
     this._form.markAllAsTouched()
@@ -224,7 +224,19 @@ patchData() {
     }
   }
 ```
-5. Template
+5. Validation
+> * Exsist in Base Form Validation
+```javascript
+  _error_image(img: ImgType){
+    if(img.error === true){
+      return 'Only jpeg | jpg | png allowed'
+    } else  if(!img.link && this._submitted){
+      return 'Please select ' + img.display
+    }
+    else return ''
+  }
+```
+6. Template
 ```html
 <div class="col-12 pb-3">
   <div class="row">
