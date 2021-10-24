@@ -1,28 +1,26 @@
 ## Custom Version 2
 > * This File is still in process
 > * May be in future that file will be split and Utilized as Service
-#### Converting Form Group Object to Form Data
-* This Method is Returning Form Data you have the flexibility whether to pass form data as reference type / take return value
+### Converting Form Group Object to Form Data
+> * This Method is Returning Form Data you have the flexibility whether to pass form data as reference type / take return value
 > * This method could also be use to add a Form Data Property to a Json Object where you can use the parent key property
 > * This method is very flexible
 > * May could be replace with Node packages in future
-##### 1. Checking Type Object
+#### 1. Checking Type Object
 ```javascript
   private static isObject(val) {
     return !this.isArray(val) && typeof val === 'object' && !!val;
   }
-
 ```
-##### 2. Checking Array Type
+#### 2. Checking Array Type
 ```javascript
-  // 2. B
   private static isArray(val) {
     const toString = {}.toString;
     return toString.call(val) === '[object Array]';
   }
 
 ```
-##### 3. Conversion Method
+#### 3. Conversion Method
 > Parameters
 > 1. Json Object
 > 2. Parent Key (Optional)
@@ -65,7 +63,7 @@
     return formData;
   }
 ```
-##### Utilization
+#### Utilization
 1. Initializing Form
 ```javascript
   initForm() {
@@ -152,8 +150,7 @@
 ```javascript
 ```
 
-
-#### Object to URL Query Conversion
+### Object to URL Query Conversion
 > Simple Object to URL Query Converter
 ```javascript
   public static objToURLQuery(searchObject: any) {
@@ -164,18 +161,17 @@
     return result;
   }
 ```
-##### Utilization
-1. Declaring Properties
+#### 1. Declaring Properties
 ```javascript
   _search: any = {};
 ```
-2. Resetting Property (For Table Purpose)
+#### 2. Resetting Property (For Table Purpose)
 ```javascript
    _reset() {
     this._search = {};
   }
 ```
-3. Base Form List (For Table Purpose)
+#### 3. Base Form List (For Table Purpose)
 ```javascript
  // Search Functionality
   _refresh(params: string = '') {
@@ -192,7 +188,7 @@
     });
   }
 ```
-4. Template Utilization
+#### 4. Template Utilization
 > * This is how we declare and Utilized Properties
 ```html
 <ng-container matColumnDef="title">
@@ -205,7 +201,7 @@
 </ng-container>
 ```
 
-#### Image Selector Customized Method
+### Image Selector Customized Method
 > * This image Selector has following feature
 > * Image Type (jpg, jpge & png)
 > * Image Size ( Needs to be implement)
@@ -240,8 +236,7 @@
     }
   }
 ```
-##### Utilization
-1. Propeties
+#### 1. Propeties
 ```javascript
   imgTop: ImgType = {display: 'Top Image'};
   imgLogo: ImgType  = {display: 'Logo Image'} ;
@@ -249,7 +244,7 @@
   imgFooter: ImgType = {display: 'Footer Image'} ;
   imgPath: string = 'assets/images/select.png';
 ```
-2. Patch Data
+#### 2. Patch Data
 ```javascript
 patchData() {
     this._service.getByCode(this._activeId).subscribe((res: any) => {
@@ -266,13 +261,13 @@ patchData() {
     });
   }
 ```
-3. Image Selector Event Handling
+#### 3. Image Selector Event Handling
 ```javascript
   readUrl(event: any, imgType: ImgType) {
    Custom.imageSelector(event, imgType)
   }
 ```
-4. Submit Event
+#### 4. Submit Event
 ```javascript
   _onSubmit(id: string = 'id') {
     this._form.markAllAsTouched()
@@ -311,7 +306,7 @@ patchData() {
     }
   }
 ```
-5. Validation
+#### 5. Validation
 > * Exsist in Base Form Validation
 ```javascript
   _error_image(img: ImgType){
@@ -323,7 +318,7 @@ patchData() {
     else return ''
   }
 ```
-6. Template
+#### 6. Template
 ```html
 <div class="col-12 pb-3">
   <div class="row">
@@ -347,15 +342,14 @@ patchData() {
 </div>
 ```
 
-
-#### Hiarchecal Dropdowns
-##### Loading Parent Dropdown
+### Hiarchecal Dropdowns
+#### 1. Loading Parent Dropdown From Base Class
 ```javascript
   _dropdown(url: URLz, code: string = '') {
     return Custom._dropdown(url, code, this._service);
   }
 ```
-##### Base Load Sub Entity Method
+#### 2. Base Load Sub Entity Method
 > * Base Class Calls the Custom Load_Sub_Entity Method because same stratgy is being used inside Table Component
 > * Switch case is to Setting Form Values to Null when User Selection Changes (May be optional) / not required
 ```javascript
@@ -388,7 +382,8 @@ patchData() {
     }
   }
 ```
-##### Custom Load Sub Entity
+#### 3. Custom Load Sub Entity
+> * _dropdown of Custom Class and loadSubEntity for BaseForm and BaseList Class Utilization
 > * In case the Parent Changes the Selection then set the empty array to child dropdowns
 > * If Switch doesn't work here then use IF ELSE
 ```javascript
@@ -419,7 +414,7 @@ patchData() {
     }
   }
 ```
-##### Component ngOnInit
+#### 4. Component ngOnInit
 > * initializing the _totalDropdown so when the form patch the values nothing stop it after that we can work on Only if the User Changes the Dropdowns
 ```javascript
 ngOnInit() {
@@ -433,7 +428,7 @@ ngOnInit() {
     }
   }
 ```
-##### Initializing Form
+#### 5. Initializing Form
 > * Setting Disable property at the time of form initialization could also be set at Template by using disabled directive either is best
 ```javascript
   initForm() {
@@ -444,7 +439,7 @@ ngOnInit() {
     });
   }
 ```
-##### Patch Data
+#### 6. Patch Data
 ```javascript
   patchData() {
     this._service.getByCode(this._activeId).subscribe((res: any) => {
@@ -457,7 +452,7 @@ ngOnInit() {
     });
   }
 ```
-##### Initialing the Parent Dropdown
+#### 7. Initialing the Parent Dropdown
 > * Child Dropdown will be handle by Templete on Selection Change Event
 ```javascript
   initDropDown() {
@@ -466,7 +461,7 @@ ngOnInit() {
     );
   }
 ```
-#### Template
+#### 8. Template
 > * (onSelectionChange)="_loadSubEntity(URLz.LE, item.id, $event)" This method is responsible the handle the request.
 ```html
 <div class="col-md-4 p-0">
@@ -505,7 +500,7 @@ ngOnInit() {
   </mat-form-field>
 </div>
 ```
-#### Swal Fire
+### Swal Fire
 > * Custom Swal Fire
 > 1. Status Changed
 > 2. Delete
@@ -567,7 +562,7 @@ ngOnInit() {
     });
   }
 ```
-##### Base Class
+#### 1. Base Class
 > * There is no role for Child Class TS File
 > * Template is Directly Invoking these Methods
 ```javascript
@@ -582,7 +577,7 @@ ngOnInit() {
     Custom.SwalFireDelete(this._service, this._component, id);
   }
 ```
-##### Component Templete Implementations
+#### 2. Component Templete Implementations
 > * Status Change
 > * Delete
 ```html
@@ -597,5 +592,3 @@ ngOnInit() {
   <i class="ti-trash text-danger px-2 pointer" (click)="_delete(item.id)"></i>
 </td>
 ```
-##### Note
-> * Custom Class will be convert into service later on
