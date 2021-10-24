@@ -1,0 +1,97 @@
+<div class="row">
+  <div class="col-sm-12 col-lg-12">
+    <div class="card">
+      <div class="card-body">
+        <h2 class="card-title">
+          {{ !_activeId ? "Add" : "Edit" }} Component
+        </h2>
+      </div>
+      <hr>
+      <form [formGroup]="_form" (ngSubmit)="_onSubmit()" autocomplete="off">
+        <div class="row card-body">
+          <div class="col-md-4 p-0">
+            <mat-form-field appearance="outline" class="col-md-12">
+              <mat-label>Law Referene</mat-label>
+              <input matInput type="text" formControlName="law">
+              <mat-error>
+                {{ _error('law')?.message }}
+              </mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-md-8 p-0">
+            <mat-form-field appearance="outline" class="col-md-12">
+              <mat-label>Address</mat-label>
+              <input matInput type="text" formControlName="address">
+              <mat-error> {{ _error('address')?.message }}</mat-error>
+            </mat-form-field>
+          </div>
+          <div class="col-md-12 p-0">
+            <mat-slide-toggle
+            formControlName="is_deposit" class="col-md-12 pt-3">
+            Required Bank Cash Deposit for DCO
+          </mat-slide-toggle>
+            <p class="pl-3 pt-2" style="font-size: 10px; color: #f44336;">
+              {{ _error('is_deposit')?.message }}
+            </p>
+          </div>
+          <div class="col-12">
+            <div formArrayName="customization">
+              <div class="row mb-4" *ngFor="let item of customizations.controls;
+              let i = index" [formGroupName]="i">
+                <div class="col-md-3 p-0">
+                  <mat-form-field appearance="outline" class="col-md-12">
+                    <mat-label>Organaization</mat-label>
+                    <mat-select formControlName="organisation_id" required>
+                      <mat-option *ngFor="let it of __ddl?.organisation_id" [value]="it.id">
+                        {{ it.title }}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error>{{ _error_FormArray(item, 'organisation_id')?.message }}</mat-error>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-3 p-0">
+                  <mat-form-field appearance="outline" class="col-md-12">
+                    <mat-label>System</mat-label>
+                    <mat-select formControlName="system_id" required>
+                      <mat-option *ngFor="let it of __ddl?.system_id" [value]="it.id">
+                        {{it.title}}
+                      </mat-option>
+                    </mat-select>
+                    <mat-error>{{ _error_FormArray(item, 'system_id')?.message }}</mat-error>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-3 p-0">
+                  <mat-form-field appearance="outline" class="col-md-12">
+                    <mat-label>Prefix</mat-label>
+                    <input matInput type="text" formControlName="prefix">
+                    <mat-error>
+                      {{ _error_FormArray(item, 'prefix')?.message }}
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+                <div class="col-md-3 p-0">
+                  <div class="col-md-12 d-flex justify-content-lg-start justify-content-sm-end">
+                    <button type="button" [disabled]="!(customizations.length > 1)"
+                      class="btn btn-sm btn-outline-danger my-2" (click)="rmvCustom(i)">Remove</button>
+                    <button type="button"
+                      [disabled]="!(item.valid && _form.get('customization').valid && customizations?.length == (i + 1))"
+                      [ngStyle]="{'display':customizations?.length == (i + 1)? 'inline' : 'none'}"
+                      class="btn btn-sm btn-outline-info my-2" (click)="addCustom()">Add</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="action-form">
+            <div class="form-group m-b-0 text-right">
+              <button type="submit" class="btn btn-info waves-effect waves-light">Save</button>
+              <button type="button" (click)="_switch()" class="btn btn-info waves-effect waves-light">Cancel</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
