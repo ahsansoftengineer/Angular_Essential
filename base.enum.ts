@@ -2,7 +2,6 @@
 export enum URLz{
   // DROP DOWNS
   DD='dropdownpath',
-  // DEPTT='majlis',
   LOCATION='location',
   PURPOSE='purpose',
   // TREE VIEW
