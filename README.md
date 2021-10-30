@@ -1,134 +1,260 @@
-## Base Service Implementation
-### GET
-> * This doesn't have to be generic type because its not in use
-> * Instead use another way round for its Generics Functionality
+## Custom Version 2
+> * This File is still in process
+> * May be in future that file will be split and Utilized as Service
+### Converting Form Group Object to Form Data
+> * This Method is Returning Form Data you have the flexibility whether to pass form data as reference type / take return value
+> * This method could also be use to add a Form Data Property to a Json Object where you can use the parent key property
+> * This method is very flexible
+> * May could be replace with Node packages in future
+#### 1. Conversion Method FormGroup to FormData
+> * Parameters
+> 1. Json Object
+> 2. Parent Key (Optional)
+> 3. Carry Form Data
 ```javascript
-  @LoaderEnabled()
-  get(id: number, param: string = ''): Observable<T> {
-    param = param !== '' ? '?' + param: ''
-      return this.http.get<T>(this.url + '/' + id + param);
+  private static isObject(val) {
+    return !this.isArray(val) && typeof val === 'object' && !!val;
   }
-```
-> * Component Implementation
-> * I think some of the task needs to be shifted in Base Service Class
-```javascript
-  // This Code Should be shifted in Base Class ngOnInit
-  this._activeId = this._activeRoute.snapshot.paramMap.get("id");
-  // Component ngOnInit
-    this.patchData();
-```
-#### 1. Without Optional Parameters
-```javascript
-  patchData(){
-    if (this._activeId != null && Number(this._activeId) > 0)
-      this._service.get(+this._activeId)
-      .subscribe((res: any) => {
-          let data = res.data.row;
-        this._form.patchValue({
-          title: data.title,
-        });
-      });
+  private static isArray(val) {
+    const toString = {}.toString;
+    return toString.call(val) === '[object Array]';
   }
-```
-#### 2. With Optional Parameters
-```javascript
-  patchData(){
-    this._service
-      .getSingle(+this._activeId, 'is_advance=1')
-      .subscribe((res: any) => {
-        // This is why I am saying there is no need for Generic Service
-        let data: DataTypeInterface = res.data.row;
-        console.log(data);
-        this._form.patchValue({
-          name: data.name,
-          gender: data.gender,
-          email: data.email,
-        })
+   public static jsontoFormData(
+    jo: Object, // Json Object
+    pk = '', // Parent Key
+    carryFormData: FormData
+  ): FormData {
+    const formData = carryFormData || new FormData();
+    let index = 0;
+    for (var key in jo) {
+      if (jo.hasOwnProperty(key)) {
+        if (jo[key] !== null && jo[key] !== undefined) {
+          var propName = pk || key;
+          if (pk && this.isObject(jo)) {
+            propName = pk + '[' + key + ']';
+          }
+          if (pk && this.isArray(jo)) {
+            propName = pk + '[' + index + ']';
+          }
+          if (jo[key] instanceof File) {
+            formData.append(propName, jo[key]);
+          } else if (jo[key] instanceof FileList) {
+            for (var j = 0; j < jo[key].length; j++) {
+              formData.append(propName + '[' + j + ']', jo[key].item(j));
+            }
+          } else if (this.isArray(jo[key]) || this.isObject(jo[key])) {
+            this.jsontoFormData(jo[key], propName, formData);
+          } else if (typeof jo[key] === 'boolean') {
+            formData.append(propName, +jo[key] ? '1' : '0');
+          } else {
+            formData.append(propName, jo[key]);
+          }
+        }
       }
+      index++;
     }
-```
-### GETS
-> * No need Generics Type
-```javascript
-  @LoaderEnabled()
-  gets(param: string = ''): Observable<T> {
-    param = param !== '' ? '?' + param: ''
-      return this.http.get<T>(this.url + param);
+    return formData;
   }
 ```
-> * Called in Component ngOnInit
+#### 2. Initializing Form
 ```javascript
-    this._refresh('is_advance=1');
-```
-> * With and Without optional parameters
-```javascript
-  // Search Functionality
-  _refresh(params: string = '') {
-    params += Custom.objToURLQuery(this._search);
-    params += `&limit=${this._tbl.size}&page=${this._tbl.index + 1}`;
-    if (this._tbl.orderBy != '' && this._tbl.orderType != '') {
-      params +=
-      `&order_by=${this._tbl.orderBy}&order_type=${this._tbl.orderType}`;
-    }
-    this._service.gets(params).subscribe((res: any) => {
-      this._dataSource.data = res.data.records;
-      this._tbl.length = res.data.totalRecords;
+  initForm() {
+    this._form = this._fb.group({
+      law: ['', this._validator('Law', 1, 4, 100)],
+      address: ['', this._validator('Address', 1, 4, 100)],
+      is_deposit: ['1', this._validator('Deposit', 1, 4, 100)],
     });
   }
 ```
-### CREATE / UPDATE
-> * with & without parameters
+#### 3. Declaring Properties
 ```javascript
-  @LoaderEnabled()
-  create(data: T, param: string = '') {
-    param = param !== '' ? '?' + param: ''
-    return this.http.post(this.url + param, data)
-      .pipe(catchError(Custom.handleError));
-  }
-  @LoaderEnabled()
-  update(data: any, param: string = '') {
-    return this.http.post(this.url + '?_method=PUT' + param, data)
-    .pipe(catchError(Custom.handleError));
+ // Images Access
+  imgTop: ImgType = {display: 'Top Image'};
+  imgLogo: ImgType  = {display: 'Logo Image'} ;
+  imgWarn: ImgType = {display: 'Warning Image'} ;
+  imgFooter: ImgType = {display: 'Footer Image'} ;
+  imgPath: string = 'assets/images/select.png';
+```
+#### 4. Patching Images if exsist in Database
+```javascript
+  patchData() {
+    this._service.getByCode(this._activeId).subscribe((res: any) => {
+      let data: T = res.data.row;
+      this._form.patchValue({
+        is_deposit: data?.is_deposit,
+        address: data?.address,
+        law: data?.law,
+      });
+      this.imgLogo.link =  data.logo;
+      this.imgTop.link = data.top_image ;
+      this.imgWarn.link = data.warning_image;
+      this.imgFooter.link = data.footer_image;
+    });
   }
 ```
-> * With / Without parameters
-> * Calling from Template 
-```html
-  <form [formGroup]="_form" (ngSubmit)="_onSubmit()">
-  <form [formGroup]="_form" (ngSubmit)="_onSubmit('&is_advance=1')">
-```
+#### 5. Event Handling to Upload Images
 ```javascript
-  _onSubmit(param = '', idz = 'id') {
-    this._form.markAllAsTouched();
+  // Here we are using Custom Image Selector
+  readUrl(event: any, imgType: ImgType) {
+   Custom.imageSelector(event, imgType)
+  }
+```
+#### 6. Sumitting Form Data to Server
+```javascript
+ _onSubmit(id: string = 'id') {
+    this._form.markAllAsTouched()
     this._submitted = true;
-    this._leaveFormActivated = false;
+    let fd = new FormData();
+    if((!this.imgFooter.link || !this.imgLogo.link
+      || !this.imgTop.link || !this.imgWarn.link)){
+        return this._isFormValid = false
+      }
+      else if(this.imgFooter.error || this.imgLogo.error ||
+        this.imgTop.error || this.imgWarn.error){
+          return this._isFormValid = false
+        }
+    if (this.imgLogo.file) fd.append('logo', this.imgLogo.file);
+    if (this.imgTop.file) fd.append('top_image', this.imgTop.file);
+    if (this.imgWarn.file) fd.append('warning_image', this.imgWarn.file);
+    if (this.imgFooter.file) fd.append('footer_image', this.imgFooter.file);
     if (this._form.valid) {
       this._isFormValid = true;
-      // Object.keys(this._form.value).forEach((key) => (this._form.value[key] == '') && delete this._form.value[key]);
-      let modify: Observable<any>;
       if (this._activeId) {
-        this._form.addControl(idz, new FormControl(this._activeId));
-        modify = this._service.update(this._form.value, param);
-      } else {
-        modify = this._service.create(this._form.value, param);
+        this._form.addControl(id, new FormControl(this._activeId));
+        Custom.jsontoFormData(this._form.value, '', fd);
+        this._service.update(fd).subscribe(
+          (res: any) => {
+            Swal.fire('Updated!', res.message);
+            this._switch();
+          },
+          (httpErrorResponse: HttpErrorResponse) => {
+            this._error_server(httpErrorResponse.error);
+          }
+        );;
       }
-      modify.subscribe(
-        (res: any) => {
-          Swal.fire(this._activeId ? 'Updated!' : 'Created!', res.message)
-        },
-        (httpErrorResponse: HttpErrorResponse) => {
-          this._error_server(httpErrorResponse.error);
-        }
-      );
       this._submitted = false;
     } else {
       return (this._isFormValid = false);
     }
   }
 ```
-> * Form Data Implementaion for create / update service
-
-
+### Object to URL Query Conversion
+> Simple Object to URL Query Converter
+```javascript
+  public static objToURLQuery(searchObject: any) {
+    let result = '';
+    for (var key of Object.keys(searchObject)) {
+      result += '&' + key + '=' + searchObject[key];
+    }
+    return result;
+  }
+```
+#### 1. Declaring Properties
+```javascript
+  _search: any = {};
+```
+#### 2. Resetting Property (For Table Purpose)
+```javascript
+   _reset() {
+    this._search = {};
+  }
+```
+#### 3. Base Form List (For Table Purpose)
+```javascript
+ // Search Functionality
+  _refresh(params: string = '') {
+    // Utilization ****
+    params += Custom.objToURLQuery(this._search);
+    params += `&limit=${this._tbl.size}&page=${this._tbl.index + 1}`;
+    if (this._tbl.orderBy != '' && this._tbl.orderType != '') {
+      params +=
+      `&order_by=${this._tbl.orderBy}&order_type=${this._tbl.orderType}`;
+    }
+    this._service.getAll(params).subscribe((res: any) => {
+      this._dataSource.data = res.data.records;
+      this._tbl.length = res.data.totalRecords;
+    });
+  }
+```
+#### 4. Template Utilization
+> * This is how we declare and Utilized Properties
+```html
+<ng-container matColumnDef="title">
+  <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition='before'>
+    <!-- *** _search.title *** -->
+    <input [(ngModel)]='_search.title' placeholder="Title" class="search" (keydown)="_stop($event)"
+      (click)="_stop($event)">
+  </th>
+  <td mat-cell *matCellDef="let item"> {{item.title}} </td>
+</ng-container>
+```
+### Image Selector Customized Method
+> * This image Selector has following feature
+> * Image Type (jpg, jpge & png)
+> * Image Size ( Needs to be implement)
+> * Already Image Selected (Update Case)
+> * Displaying Image in Template
+```javascript
+  public static imageSelector(event: any, imgType: ImgType) {
+    if (event.target.files.length === 0) {
+      imgType.link = ''
+      imgType.display
+      return
+    };
+    var mimeType = event.target.files[0].type;
+    const file: File = event.target.files[0];
+    const name = file.name
+    const ext = name.substring(name.lastIndexOf('.') + 1, file.name.length)
+    if (mimeType.match(/image\/*/) == null &&
+    'jpeg jpg png'.indexOf(ext) == -1 ) {
+      imgType.error = true;
+      imgType.link = ''
+      return;
+    } else {
+      imgType.error = false
+    }
+    // Image upload
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (_event) => {
+        imgType.link = _event.target.result;
+        imgType.file = event.srcElement.files[0];
+        imgType.name = event.srcElement.files[0].name;
+    }
+  }
+```
+#### 1. Propeties
+```javascript
+  imgTop: ImgType = {display: 'Top Image'};
+  imgLogo: ImgType  = {display: 'Logo Image'} ;
+  imgWarn: ImgType = {display: 'Warning Image'} ;
+  imgFooter: ImgType = {display: 'Footer Image'} ;
+  imgPath: string = 'assets/images/select.png';
+```
+#### 2. Patch Data
+```javascript
+patchData() {
+    this._service.getByCode(this._activeId).subscribe((res: any) => {
+      let data: T = res.data.row;
+      this._form.patchValue({
+        is_deposit: data?.is_deposit,
+        address: data?.address,
+        law: data?.law,
+      });
+      this.imgLogo.link =  data.logo;
+      this.imgTop.link = data.top_image ;
+      this.imgWarn.link = data.warning_image;
+      this.imgFooter.link = data.footer_image;
+    });
+  }
+```
+#### 3. Image Selector Event Handling
+```javascript
+  readUrl(event: any, imgType: ImgType) {
+   Custom.imageSelector(event, imgType)
+  }
+```
+#### 4. Submit Event
 ```javascript
   _onSubmit(id: string = 'id') {
     this._form.markAllAsTouched()
@@ -167,27 +293,204 @@
     }
   }
 ```
-### DELETE
-> * Here we are not using official delete method of Http Client
+#### 5. Validation
+> * Exsist in Base Form Validation
 ```javascript
-  @LoaderEnabled()
-  delete(id: number, param: string = '') {
-    return this.http.post(this.url + '/' + id + '?_method=DELETE' + param, id);
+  _error_image(img: ImgType){
+    if(img.error === true){
+      return 'Only jpeg | jpg | png allowed'
+    } else  if(!img.link && this._submitted){
+      return 'Please select ' + img.display
+    }
+    else return ''
   }
 ```
-#### 1. Calling Delete Method from Template
+#### 6. Template
 ```html
-<i class="ti-trash text-danger pointer" (click)="_delete(item.id)"></i>
+<div class="col-12 pb-3">
+  <div class="row">
+    <div class="col-md-3">
+      <p>Logo</p>
+      <img alt="logo" class="img-fluid" [src]="imgLogo.link ? imgLogo.link : imgPath">
+      <input class="upload-large" type="file" (change)="readUrl($event, imgLogo)">
+      <p style="font-size: 10px; color: #f44336;">
+        {{ _error_image(imgLogo) }}
+      </p>
+    </div>
+    <div class="col-md-3">
+      <p>Top Image</p>
+      <img alt="Top Image" class="img-fluid" [src]="imgTop.link ? imgTop.link : imgPath">
+      <input class="upload-large" type="file" (change)="readUrl($event,imgTop)">
+      <p style="font-size: 10px; color: #f44336;">
+        {{ _error_image(imgTop) }}
+      </p>
+    </div>
+  </div>
+</div>
 ```
-#### 2. Calling Delete Method from Base Class
+### Hiarchecal Dropdowns
+#### 1. Loading Parent Dropdown From Base Class
 ```javascript
-  _delete(id: number) {
-    Custom.SwalFireDelete(this._service, this._component, id);
+  _dropdown(url: URLz, code: string = '') {
+    return Custom._dropdown(url, code, this._service);
   }
 ```
-#### 3. Custom Swal Fire Delete Implementation
+#### 2. Base Load Sub Entity Method
+> * Base Class Calls the Custom Load_Sub_Entity Method because same stratgy is being used inside Table Component
+> * Switch case is to Setting Form Values to Null when User Selection Changes (May be optional) / not required
 ```javascript
-  public static statusEmmit: EventEmitter<any> = new EventEmitter();
+  _ddIncrement = 0;
+  _totalDropdown = 0;
+  _loadSubEntity(entity: URLz, code: string, event: MatOptionSelectionChange) {
+    this._ddIncrement++;
+    if (
+      event?.isUserInput ||
+      (this._activeId && this.__totalDropdown >= this._ddIncrement)
+    ) {
+      if(event?.isUserInput){
+        switch (entity) {
+          case URLz.LE:
+            if (this._form.contains('le'))
+              this._form.get('le').setValue('');
+              this.__ddl.le = [];
+          case URLz.OU || URLz.LE:
+            if (this._form.contains('ou'))
+              this._form.get('ou').setValue('');
+              this.__ddl.ou = [];
+          case URLz.OU || URLz.SU || URLz.LE:
+            if (this._form.contains('su'))
+              this._form.get('su').setValue('');
+              this.__ddl.su = [];
+            break;
+      }
+      }
+      Custom.loadSubEntity(entity, code, this.__ddl, this._service);
+    }
+  }
+```
+#### 3. Custom Load Sub Entity
+> * _dropdown of Custom Class and loadSubEntity for BaseForm and BaseList Class Utilization
+> * In case the Parent Changes the Selection then set the empty array to child dropdowns
+> * If Switch doesn't work here then use IF ELSE
+```javascript
+  public static _dropdown(url: URLz, code, service) {
+    return service.selectOptionService(url, code);
+  }
+  public static loadSubEntity(entity: URLz, code, __ddl, service) {
+    if (code?.target?.value) {
+      code = code.target.value;
+    }
+    switch (entity) {
+      case URLz.LE:
+        this._dropdown(entity, code, service).subscribe(
+          (res) => __ddl.le = res.data.records); break;
+      case URLz.OU:
+        this._dropdown(entity, code, service).subscribe(
+          (res) => __ddl.ou = res.data.records); break;
+      case URLz.SU:
+      this._dropdown(entity, code, service).subscribe(
+        (res) => __ddl.su = res.data.records ); break;
+      case URLz.STATE:
+        this._dropdown(entity, code, service).subscribe(
+          (res) => __ddl.state_id = res.data.records);
+      case URLz.CITY:
+        this._dropdown(entity, code, service).subscribe(
+          (res) => __ddl.city_id = res.data.records
+        );
+    }
+  }
+```
+#### 4. Component ngOnInit
+> * initializing the _totalDropdown so when the form patch the values nothing stop it after that we can work on Only if the User Changes the Dropdowns
+```javascript
+ngOnInit() {
+    this._pathLocation = '/operating_unit/ou';
+    this._totalDropdown = 2
+    this.initForm();
+    this.initDropDown();
+    this._activeId = this._activeRoute.snapshot.paramMap.get('id');
+    if (this._activeId) {
+      this.patchData();
+    }
+  }
+```
+#### 5. Initializing Form
+> * Setting Disable property at the time of form initialization could also be set at Template by using disabled directive either is best
+```javascript
+  initForm() {
+    this._form = this._fb.group({
+      bg: [{value: '', disabled: true},  this._validator('Business Group', 0)],
+      le: [{value: '', disabled: true}, this._validator('Legal Entity', 0)],
+      ou: [{value: '', disabled: true}, this._validator('Operating Unit', 0, 4, 100)],
+    });
+  }
+```
+#### 6. Patch Data
+```javascript
+  patchData() {
+    this._service.getByCode(this._activeId).subscribe((res: any) => {
+      let data: T = res.data.row;
+      this._form.patchValue({
+        bg: data?.bg,
+        le: data?.le,
+        ou: data?.ou,
+      });
+    });
+  }
+```
+#### 7. Initialing the Parent Dropdown
+> * Child Dropdown will be handle by Templete on Selection Change Event
+```javascript
+  initDropDown() {
+    this._dropdown(URLz.BG).subscribe(
+      (res) => (this.__ddl.bg = res.data.records)
+    );
+  }
+```
+#### 8. Template
+> * (onSelectionChange)="_loadSubEntity(URLz.LE, item.id, $event)" This method is responsible the handle the request.
+```html
+<div class="col-md-4 p-0">
+  <mat-form-field appearance="outline" class="col-md-12">
+    <mat-label>BG</mat-label>
+    <mat-select formControlName="bg" required>
+      <mat-option (onSelectionChange)="_loadSubEntity(URLz.LE, item.id, $event)"
+        *ngFor="let item of __ddl?.bg" [value]="item.id">
+        {{item.title}}
+      </mat-option>
+    </mat-select>
+    <mat-error>{{_error('bg')?.message}}</mat-error>
+  </mat-form-field>
+</div>
+<div class="col-md-4 p-0">
+  <mat-form-field appearance="outline" class="col-md-12">
+    <mat-label>LE</mat-label>
+    <mat-select formControlName="le" required>
+      <mat-option (onSelectionChange)="_loadSubEntity(URLz.OU, item.id, $event)"
+        *ngFor="let item of __ddl?.le" [value]="item.id">
+        {{item.title}}
+      </mat-option>
+    </mat-select>
+    <mat-error>{{_error('le')?.message}}</mat-error>
+  </mat-form-field>
+</div>
+<div class="col-md-4 p-0">
+  <mat-form-field appearance="outline" class="col-md-12">
+    <mat-label>OU</mat-label>
+    <mat-select formControlName="ou" required>
+      <mat-option *ngFor="let item of __ddl?.ou" [value]="item.id">
+        {{item.title}}
+      </mat-option>
+    </mat-select>
+    <mat-error>{{_error('ou')?.message}}</mat-error>
+  </mat-form-field>
+</div>
+```
+### Swal Fire
+> * Custom Swal Fire
+> 1. Status Changed
+> 2. Delete
+```javascript
   public static async SwalFireDelete(
     service: any,
     class_name: string,
@@ -204,66 +507,19 @@
     }).then((result) => {
       if (result.isConfirmed) {
         service.delete(id).subscribe((response: any) => {
-          // Swal.fire('Deleted!', response.message, 'success');
           Custom.statusEmmit.emit('done');
           Swal.fire(
             'Deleted!',
             class_name + ' deleted successfully',
             'success'
           );
-          // this.ngOnInit();
         });
       } else {
         Custom.statusEmmit.emit('not deleted');
       }
     });
   }
-```
-#### 4. Subscribing the Status Change Event Emmitter 
-> * Here we are subscribing the status changed so we could refresh when the Service Complete Execution 
-> * This is happening in Base List Class
-```javascript
-  ngOnInit(){
-    Custom.statusEmmit.subscribe(status => {
-      this._refresh();
-    })
-    this._reset();
-    this._refresh();
-  }
-```
-### STATUS
-> * Status Changed is pretty much same as delete 
-```javascript
-  @LoaderEnabled()
-  status(data:any, param: string = '') {
-    return this.http.post(this.url + '?_method=PATCH' + param, data);
-  }
-```
-#### 1. Component Template
-```html
-<td class="pl-3" mat-cell *matCellDef="let item">
-  <ui-switch 
-    color="green" 
-    size="small" 
-    [(ngModel)]="item.activate" 
-    (change)="_statusChange($event, item.id)">
-  </ui-switch>
-</td>
-```
-#### 2. Base List Class
-```javascript
-  _statusChange(value: boolean, id: number) {
-    this._status.activate = +value;
-    this._status.id = id;
-    Custom.SwalFireStatusChange(
-      this._service, this._status, this._component
-    );
-  }
-```
-#### 3. Custom Class
-```javascript
-  public static statusEmmit: EventEmitter<any> = new EventEmitter();
- public static async SwalFireStatusChange(
+  public static async SwalFireStatusChange(
     service: any,
     status: any,
     class_name: string = 'Class'
@@ -292,146 +548,33 @@
     });
   }
 ```
-#### 4. Base List Class Subscription
+#### 1. Base Class
+> * There is no role for Child Class TS File
+> * Template is Directly Invoking these Methods
 ```javascript
-  ngOnInit(){
-    Custom.statusEmmit.subscribe(status => {
-      this._refresh();
-    })
-    this._reset();
-    this._refresh();
-  }
-```
-### DROPDOWN
-> * This is Used in Several Ways
-```javascript
-  @LoaderEnabled()
-  dropDown(url: URLz, p_id: any = ''): Observable<any> {
-    p_id = p_id != '' ? ('?parent_id='+ p_id) :  p_id
-    return this.http.get<SelectOption[]>(
-      environment.API_URL + url + p_id
+  _statusChange(value: boolean, id: number) {
+    this._status.activate = +value;
+    this._status.id = id;
+    Custom.SwalFireStatusChange(
+      this._service, this._status, this._component
     );
   }
-```
-#### Simple Dropdowns
-```javascript
-  initDropDown(){
-    this._dropdown(URLz.BG).subscribe(res =>
-      this.__ddl.bg = res.data.records
-    );
+  _delete(id: number) {
+    Custom.SwalFireDelete(this._service, this._component, id);
   }
 ```
-#### Hiarchycal Dropdown (Template)
+#### 2. Component Templete Implementations
+> * Status Change
+> * Delete
 ```html
-  <div class="col-md-4 p-0">
-  <mat-form-field appearance="outline" class="col-md-12">
-    <mat-label>A</mat-label>
-    <mat-select formControlName="a" required>
-      <mat-option
-      (onSelectionChange)="_loadSubEntity(URLz.B, item.id, $event, 4)"
-      *ngFor="let item of __ddl?.a" [value]="item.id">
-        {{item.title}}
-      </mat-option>
-    </mat-select>
-    <mat-error>{{_error('a')?.message}}</mat-error>
-  </mat-form-field>
-</div>
-<div class="col-md-4 p-0">
-  <mat-form-field appearance="outline" class="col-md-12">
-    <mat-label>B</mat-label>
-    <mat-select formControlName="b" required>
-      <mat-option
-      (onSelectionChange)="_loadSubEntity(URLz.C, item.id, $event, 4)"
-      *ngFor="let item of __ddl?.b" [value]="item.id">
-        {{item.title}}
-      </mat-option>
-    </mat-select>
-    <mat-error>{{_error('b')?.message}}</mat-error>
-  </mat-form-field>
-</div>
-<div class="col-md-4 p-0">
-  <mat-form-field appearance="outline" class="col-md-12">
-    <mat-label>C</mat-label>
-    <mat-select formControlName="c" required>
-      <mat-option
-      (onSelectionChange)="_loadSubEntity(URLz.D, item.id, $event, 4)"
-      *ngFor="let item of __ddl?.c" [value]="item.id">
-        {{item.title}}
-      </mat-option>
-    </mat-select>
-    <mat-error>{{_error('c')?.message}}</mat-error>
-  </mat-form-field>
-</div>
+  <!-- Status Changed -->
+  <td mat-cell *matCellDef="let item">
+    <ui-switch color="green" size="small" [(ngModel)]="item.activate"
+      (change)="_statusChange($event, item.id)">
+    </ui-switch>
+  </td>
+  <!-- Delete -->
+  <td class="pl-3" mat-cell *matCellDef="let item">
+  <i class="ti-trash text-danger px-2 pointer" (click)="_delete(item.id)"></i>
+</td>
 ```
-#### Hiarchycal Dropdowns (TS)
-```javascript
-  _ddIncrement = 0;
-  _totalDropdown = 0;
-  __ddl: any = {};
-  _resetSubscription() {}
-  _dropdown(url: URLz, code: string = '') {
-    return Custom._dropdown(url, code, this._service);
-  }
-  _loadSubEntity(entity: URLz, code: string, event: MatOptionSelectionChange) {
-    this._ddIncrement++;
-    if (
-      event?.isUserInput ||
-      (this._activeId && this._totalDropdown >= this._ddIncrement)
-    ) {
-      if(event?.isUserInput){
-        switch (entity) {
-          case URLz.LE:
-            if (this._form.contains('b'))
-              this._form.get('b').setValue('');
-          case URLz.OU || URLz.LE:
-            if (this._form.contains('c'))
-              this._form.get('c').setValue('');
-          case URLz.OU || URLz.SU || URLz.LE:
-            if (this._form.contains('d'))
-              this._form.get('d').setValue('');
-            break;
-      }
-      }
-      Custom.loadSubEntity(entity, code, this.__ddl, this._service);
-    }
-  }
-```
-#### Hiarchycal Dropdown (Custom File)
-1. why we are passing service as a argument when ever we could have Service Inject Directly Here
-2. Also Set the Form Value Empty Here
-```javascript
- public static loadSubEntity(entity: URLz, code, __ddl, service) {
-    if (code?.target?.value) {
-      code = code?.target?.value;
-    }
-    if (entity == URLz.B) {
-      this._dropdown(entity, code, service).subscribe(
-        (res) => (__ddl.b = res.data.records)
-      );
-      __ddl.c = [];
-      __ddl.d = [];
-    } else if (entity == URLz.C) {
-      this._dropdown(entity, code, service).subscribe(
-        (res) => (__ddl.c = res.data.records)
-      );
-      __ddl.d = [];
-    } else if (entity == URLz.D) {
-      this._dropdown(entity, code, service).subscribe(
-        (res) => {
-          __ddl.d = res.data.records
-        }
-      );
-    }
-  }
-  public static _dropdown(url: URLz, code, service) {
-    return service.selectOptionService(url, code);
-  }
-```
-
-
-
-
-
-
-
-
