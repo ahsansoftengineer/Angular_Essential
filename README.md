@@ -1,4 +1,5 @@
 ## Custom Version 2
+> * DETAILED VERSION IS CUSTOM IMPLEMENTATION
 > * This File is still in process
 > * May be in future that file will be split and Utilized as Service
 ### Converting Form Group Object to Form Data
@@ -56,88 +57,6 @@
     return formData;
   }
 ```
-#### 2. Initializing Form
-```javascript
-  initForm() {
-    this._form = this._fb.group({
-      law: ['', this._validator('Law', 1, 4, 100)],
-      address: ['', this._validator('Address', 1, 4, 100)],
-      is_deposit: ['1', this._validator('Deposit', 1, 4, 100)],
-    });
-  }
-```
-#### 3. Declaring Properties
-```javascript
- // Images Access
-  imgTop: ImgType = {display: 'Top Image'};
-  imgLogo: ImgType  = {display: 'Logo Image'} ;
-  imgWarn: ImgType = {display: 'Warning Image'} ;
-  imgFooter: ImgType = {display: 'Footer Image'} ;
-  imgPath: string = 'assets/images/select.png';
-```
-#### 4. Patching Images if exsist in Database
-```javascript
-  patchData() {
-    this._service.getByCode(this._activeId).subscribe((res: any) => {
-      let data: T = res.data.row;
-      this._form.patchValue({
-        is_deposit: data?.is_deposit,
-        address: data?.address,
-        law: data?.law,
-      });
-      this.imgLogo.link =  data.logo;
-      this.imgTop.link = data.top_image ;
-      this.imgWarn.link = data.warning_image;
-      this.imgFooter.link = data.footer_image;
-    });
-  }
-```
-#### 5. Event Handling to Upload Images
-```javascript
-  // Here we are using Custom Image Selector
-  readUrl(event: any, imgType: ImgType) {
-   Custom.imageSelector(event, imgType)
-  }
-```
-#### 6. Sumitting Form Data to Server
-```javascript
- _onSubmit(id: string = 'id') {
-    this._form.markAllAsTouched()
-    this._submitted = true;
-    let fd = new FormData();
-    if((!this.imgFooter.link || !this.imgLogo.link
-      || !this.imgTop.link || !this.imgWarn.link)){
-        return this._isFormValid = false
-      }
-      else if(this.imgFooter.error || this.imgLogo.error ||
-        this.imgTop.error || this.imgWarn.error){
-          return this._isFormValid = false
-        }
-    if (this.imgLogo.file) fd.append('logo', this.imgLogo.file);
-    if (this.imgTop.file) fd.append('top_image', this.imgTop.file);
-    if (this.imgWarn.file) fd.append('warning_image', this.imgWarn.file);
-    if (this.imgFooter.file) fd.append('footer_image', this.imgFooter.file);
-    if (this._form.valid) {
-      this._isFormValid = true;
-      if (this._activeId) {
-        this._form.addControl(id, new FormControl(this._activeId));
-        Custom.jsontoFormData(this._form.value, '', fd);
-        this._service.update(fd).subscribe(
-          (res: any) => {
-            Swal.fire('Updated!', res.message);
-            this._switch();
-          },
-          (httpErrorResponse: HttpErrorResponse) => {
-            this._error_server(httpErrorResponse.error);
-          }
-        );;
-      }
-      this._submitted = false;
-    } else {
-      return (this._isFormValid = false);
-    }
-  }
-```
 ### Object to URL Query Conversion
 > Simple Object to URL Query Converter
 ```javascript
@@ -148,45 +67,6 @@
     }
     return result;
   }
-```
-#### 1. Declaring Properties
-```javascript
-  _search: any = {};
-```
-#### 2. Resetting Property (For Table Purpose)
-```javascript
-   _reset() {
-    this._search = {};
-  }
-```
-#### 3. Base Form List (For Table Purpose)
-```javascript
- // Search Functionality
-  _refresh(params: string = '') {
-    // Utilization ****
-    params += Custom.objToURLQuery(this._search);
-    params += `&limit=${this._tbl.size}&page=${this._tbl.index + 1}`;
-    if (this._tbl.orderBy != '' && this._tbl.orderType != '') {
-      params +=
-      `&order_by=${this._tbl.orderBy}&order_type=${this._tbl.orderType}`;
-    }
-    this._service.getAll(params).subscribe((res: any) => {
-      this._dataSource.data = res.data.records;
-      this._tbl.length = res.data.totalRecords;
-    });
-  }
-```
-#### 4. Template Utilization
-> * This is how we declare and Utilized Properties
-```html
-<ng-container matColumnDef="title">
-  <th mat-header-cell *matHeaderCellDef mat-sort-header arrowPosition='before'>
-    <!-- *** _search.title *** -->
-    <input [(ngModel)]='_search.title' placeholder="Title" class="search" (keydown)="_stop($event)"
-      (click)="_stop($event)">
-  </th>
-  <td mat-cell *matCellDef="let item"> {{item.title}} </td>
-</ng-container>
 ```
 ### Image Selector Customized Method
 > * This image Selector has following feature
@@ -223,149 +103,11 @@
     }
   }
 ```
-#### 1. Propeties
-```javascript
-  imgTop: ImgType = {display: 'Top Image'};
-  imgLogo: ImgType  = {display: 'Logo Image'} ;
-  imgWarn: ImgType = {display: 'Warning Image'} ;
-  imgFooter: ImgType = {display: 'Footer Image'} ;
-  imgPath: string = 'assets/images/select.png';
-```
-#### 2. Patch Data
-```javascript
-patchData() {
-    this._service.getByCode(this._activeId).subscribe((res: any) => {
-      let data: T = res.data.row;
-      this._form.patchValue({
-        is_deposit: data?.is_deposit,
-        address: data?.address,
-        law: data?.law,
-      });
-      this.imgLogo.link =  data.logo;
-      this.imgTop.link = data.top_image ;
-      this.imgWarn.link = data.warning_image;
-      this.imgFooter.link = data.footer_image;
-    });
-  }
-```
-#### 3. Image Selector Event Handling
-```javascript
-  readUrl(event: any, imgType: ImgType) {
-   Custom.imageSelector(event, imgType)
-  }
-```
-#### 4. Submit Event
-```javascript
-  _onSubmit(id: string = 'id') {
-    this._form.markAllAsTouched()
-    this._submitted = true;
-    let fd = new FormData();
-    if((!this.imgFooter.link || !this.imgLogo.link
-      || !this.imgTop.link || !this.imgWarn.link)){
-        return this._isFormValid = false
-      }
-      else if(this.imgFooter.error || this.imgLogo.error ||
-        this.imgTop.error || this.imgWarn.error){
-          return this._isFormValid = false
-        }
-    if (this.imgLogo.file) fd.append('logo', this.imgLogo.file);
-    if (this.imgTop.file) fd.append('top_image', this.imgTop.file);
-    if (this.imgWarn.file) fd.append('warning_image', this.imgWarn.file);
-    if (this.imgFooter.file) fd.append('footer_image', this.imgFooter.file);
-    if (this._form.valid) {
-      this._isFormValid = true;
-      if (this._activeId) {
-        this._form.addControl(id, new FormControl(this._activeId));
-        Custom.jsontoFormData(this._form.value, '', fd);
-        this._service.update(fd).subscribe(
-          (res: any) => {
-            Swal.fire('Updated!', res.message);
-            this._switch();
-          },
-          (httpErrorResponse: HttpErrorResponse) => {
-            this._error_server(httpErrorResponse.error);
-          }
-        );;
-      }
-      this._submitted = false;
-    } else {
-      return (this._isFormValid = false);
-    }
-  }
-```
-#### 5. Validation
-> * Exsist in Base Form Validation
-```javascript
-  _error_image(img: ImgType){
-    if(img.error === true){
-      return 'Only jpeg | jpg | png allowed'
-    } else  if(!img.link && this._submitted){
-      return 'Please select ' + img.display
-    }
-    else return ''
-  }
-```
-#### 6. Template
-```html
-<div class="col-12 pb-3">
-  <div class="row">
-    <div class="col-md-3">
-      <p>Logo</p>
-      <img alt="logo" class="img-fluid" [src]="imgLogo.link ? imgLogo.link : imgPath">
-      <input class="upload-large" type="file" (change)="readUrl($event, imgLogo)">
-      <p style="font-size: 10px; color: #f44336;">
-        {{ _error_image(imgLogo) }}
-      </p>
-    </div>
-    <div class="col-md-3">
-      <p>Top Image</p>
-      <img alt="Top Image" class="img-fluid" [src]="imgTop.link ? imgTop.link : imgPath">
-      <input class="upload-large" type="file" (change)="readUrl($event,imgTop)">
-      <p style="font-size: 10px; color: #f44336;">
-        {{ _error_image(imgTop) }}
-      </p>
-    </div>
-  </div>
-</div>
-```
 ### Hiarchecal Dropdowns
 #### 1. Loading Parent Dropdown From Base Class
 ```javascript
   _dropdown(url: URLz, code: string = '') {
     return Custom._dropdown(url, code, this._service);
-  }
-```
-#### 2. Base Load Sub Entity Method
-> * Base Class Calls the Custom Load_Sub_Entity Method because same stratgy is being used inside Table Component
-> * Switch case is to Setting Form Values to Null when User Selection Changes (May be optional) / not required
-```javascript
-  _ddIncrement = 0;
-  _totalDropdown = 0;
-  _loadSubEntity(entity: URLz, code: string, event: MatOptionSelectionChange) {
-    this._ddIncrement++;
-    if (
-      event?.isUserInput ||
-      (this._activeId && this.__totalDropdown >= this._ddIncrement)
-    ) {
-      if(event?.isUserInput){
-        switch (entity) {
-          case URLz.LE:
-            if (this._form.contains('le'))
-              this._form.get('le').setValue('');
-              this.__ddl.le = [];
-          case URLz.OU || URLz.LE:
-            if (this._form.contains('ou'))
-              this._form.get('ou').setValue('');
-              this.__ddl.ou = [];
-          case URLz.OU || URLz.SU || URLz.LE:
-            if (this._form.contains('su'))
-              this._form.get('su').setValue('');
-              this.__ddl.su = [];
-            break;
-      }
-      }
-      Custom.loadSubEntity(entity, code, this.__ddl, this._service);
-    }
   }
 ```
 #### 3. Custom Load Sub Entity
@@ -399,92 +141,6 @@ patchData() {
         );
     }
   }
-```
-#### 4. Component ngOnInit
-> * initializing the _totalDropdown so when the form patch the values nothing stop it after that we can work on Only if the User Changes the Dropdowns
-```javascript
-ngOnInit() {
-    this._pathLocation = '/operating_unit/ou';
-    this._totalDropdown = 2
-    this.initForm();
-    this.initDropDown();
-    this._activeId = this._activeRoute.snapshot.paramMap.get('id');
-    if (this._activeId) {
-      this.patchData();
-    }
-  }
-```
-#### 5. Initializing Form
-> * Setting Disable property at the time of form initialization could also be set at Template by using disabled directive either is best
-```javascript
-  initForm() {
-    this._form = this._fb.group({
-      bg: [{value: '', disabled: true},  this._validator('Business Group', 0)],
-      le: [{value: '', disabled: true}, this._validator('Legal Entity', 0)],
-      ou: [{value: '', disabled: true}, this._validator('Operating Unit', 0, 4, 100)],
-    });
-  }
-```
-#### 6. Patch Data
-```javascript
-  patchData() {
-    this._service.getByCode(this._activeId).subscribe((res: any) => {
-      let data: T = res.data.row;
-      this._form.patchValue({
-        bg: data?.bg,
-        le: data?.le,
-        ou: data?.ou,
-      });
-    });
-  }
-```
-#### 7. Initialing the Parent Dropdown
-> * Child Dropdown will be handle by Templete on Selection Change Event
-```javascript
-  initDropDown() {
-    this._dropdown(URLz.BG).subscribe(
-      (res) => (this.__ddl.bg = res.data.records)
-    );
-  }
-```
-#### 8. Template
-> * (onSelectionChange)="_loadSubEntity(URLz.LE, item.id, $event)" This method is responsible the handle the request.
-```html
-<div class="col-md-4 p-0">
-  <mat-form-field appearance="outline" class="col-md-12">
-    <mat-label>BG</mat-label>
-    <mat-select formControlName="bg" required>
-      <mat-option (onSelectionChange)="_loadSubEntity(URLz.LE, item.id, $event)"
-        *ngFor="let item of __ddl?.bg" [value]="item.id">
-        {{item.title}}
-      </mat-option>
-    </mat-select>
-    <mat-error>{{_error('bg')?.message}}</mat-error>
-  </mat-form-field>
-</div>
-<div class="col-md-4 p-0">
-  <mat-form-field appearance="outline" class="col-md-12">
-    <mat-label>LE</mat-label>
-    <mat-select formControlName="le" required>
-      <mat-option (onSelectionChange)="_loadSubEntity(URLz.OU, item.id, $event)"
-        *ngFor="let item of __ddl?.le" [value]="item.id">
-        {{item.title}}
-      </mat-option>
-    </mat-select>
-    <mat-error>{{_error('le')?.message}}</mat-error>
-  </mat-form-field>
-</div>
-<div class="col-md-4 p-0">
-  <mat-form-field appearance="outline" class="col-md-12">
-    <mat-label>OU</mat-label>
-    <mat-select formControlName="ou" required>
-      <mat-option *ngFor="let item of __ddl?.ou" [value]="item.id">
-        {{item.title}}
-      </mat-option>
-    </mat-select>
-    <mat-error>{{_error('ou')?.message}}</mat-error>
-  </mat-form-field>
-</div>
 ```
 ### Swal Fire
 > * Custom Swal Fire
@@ -547,34 +203,4 @@ ngOnInit() {
       }
     });
   }
-```
-#### 1. Base Class
-> * There is no role for Child Class TS File
-> * Template is Directly Invoking these Methods
-```javascript
-  _statusChange(value: boolean, id: number) {
-    this._status.activate = +value;
-    this._status.id = id;
-    Custom.SwalFireStatusChange(
-      this._service, this._status, this._component
-    );
-  }
-  _delete(id: number) {
-    Custom.SwalFireDelete(this._service, this._component, id);
-  }
-```
-#### 2. Component Templete Implementations
-> * Status Change
-> * Delete
-```html
-  <!-- Status Changed -->
-  <td mat-cell *matCellDef="let item">
-    <ui-switch color="green" size="small" [(ngModel)]="item.activate"
-      (change)="_statusChange($event, item.id)">
-    </ui-switch>
-  </td>
-  <!-- Delete -->
-  <td class="pl-3" mat-cell *matCellDef="let item">
-  <i class="ti-trash text-danger px-2 pointer" (click)="_delete(item.id)"></i>
-</td>
 ```
