@@ -41,14 +41,14 @@ export class Component extends BaseFormDropDown implements OnInit {
   }
 ```
 ### Initializing Form
-> * Adding Customization on Startup
+> * Adding array_group on Startup
 ```javascript
   initForm() {
     this._form = this._fb.group({
       law: ['', this._validator('Law', 1, 4, 100)],
       address: ['', this._validator('Address', 1, 4, 100)],
       is_deposit: ['1', this._validator('Deposit', 1, 4, 100)],
-      customization: this._fb.array([this.customization()]),
+      array_group: this._fb.array([this.array_group()]),
     });
   }
 ```
@@ -62,77 +62,77 @@ export class Component extends BaseFormDropDown implements OnInit {
         address: data?.address,
         is_deposit: data?.is_deposit,
       });
-      if(data.customization.length > 0)
-        this.patchCustomization(data.customization);
+      if(data.array_group.length > 0)
+        this.patcharray_group(data.array_group);
     });
   }
 ```
 ### Intializing Drop Downs
 ```javascript
   initDropDown() {
-    this._dropdown(URLz.SYSTEM).subscribe(
-      (res) => (this.__ddl.system_id = res.data.records)
+    this._dropdown(URLz.field_2).subscribe(
+      (res) => (this.__ddl.field_2_id = res.data.records)
     );
     this._dropdown(URLz.ORG).subscribe(
-      (res) => (this.__ddl.organisation_id = res.data.records)
+      (res) => (this.__ddl.field_1_id = res.data.records)
     );
   }
 ```
 ### TS Changes to Implement Form Array
-#### 1 Customization (Initialization)
+#### 1 array_group (Initialization)
 > * Adding No Repeat Validator
 ```javascript
   // 
-  customization(): FormGroup {
+  array_group(): FormGroup {
     return this._fb.group(
       {
-        organisation_id: ['', this._validator('Organization', 0)],
-        system_id: ['', this._validator('System', 0)],
-        prefix: ['', this._validator('Prefix')],
+        field_1_id: ['', this._validator('Organization', 0)],
+        field_2_id: ['', this._validator('field_2', 0)],
+        field_3: ['', this._validator('field_3')],
       },
       {
         validators: this._duplicate_FormArray_FormGroup_Validator(
-          'organisation_id',
-          'system_id',
-          'customization'
+          'field_1_id',
+          'field_2_id',
+          'array_group'
         ),
       }
     );
   }
 ```
-#### 2 Customization (Template Iteration)
+#### 2 array_group (Template Iteration)
 ```javascript
-  get customizations() {
-    return this._form?.get('customization') as FormArray;
+  get array_groups() {
+    return this._form?.get('array_group') as FormArray;
   }
 ```
-#### 4 Customization (Removing)
+#### 4 array_group (Removing)
 ```javascript
   rmvCustom(index: number) {
-    let arrayz = <FormArray>this._form.get('customization');
+    let arrayz = <FormArray>this._form.get('array_group');
     arrayz.removeAt(index);
   }
 ```
-#### 5 Customization (Patching)
-> * Patching Customization is Conditionally
-> * If Customization is exsist then remove the default that is proved
+#### 5 array_group (Patching)
+> * Patching array_group is Conditionally
+> * If array_group is exsist then remove the default that is proved
 ```javascript
   patchCustom(
-    customization: {
-      organisation_id: string;
-      system_id: string;
-      prefix: string;
+    array_group: {
+      field_1_id: string;
+      field_2_id: string;
+      field_3: string;
     }[]
   ) {
-    let formArray = this._form.get('customization') as FormArray;
-    if(customization.length > 0)
+    let formArray = this._form.get('array_group') as FormArray;
+    if(array_group.length > 0)
       formArray.clear();
-    customization.forEach((custom) => {
+    array_group.forEach((custom) => {
       formArray.push(
         this._fb.group({
-          organisation_id: custom.organisation_id,
-          system_id: custom.system_id,
-          prefix: custom.prefix,
+          field_1_id: custom.field_1_id,
+          field_2_id: custom.field_2_id,
+          field_3: custom.field_3,
         })
       );
     });
@@ -189,51 +189,51 @@ export class Component extends BaseFormDropDown implements OnInit {
     } else return null
   }
 ```
-#### 8 Customization Template
+#### 8 array_group Template
 > * Conditionally (Add / Remove) is Conditionally (Hide / Show)
 ```html
 <div class="col-12">
-  <div formArrayName="customization">
-    <div class="row mb-4" *ngFor="let item of customizations.controls;
+  <div formArrayName="array_group">
+    <div class="row mb-4" *ngFor="let item of array_groups.controls;
     let i = index" [formGroupName]="i">
       <div class="col-md-3 p-0">
         <mat-form-field appearance="outline" class="col-md-12">
-          <mat-label>Organaization</mat-label>
-          <mat-select formControlName="organisation_id" required>
-            <mat-option *ngFor="let it of __ddl?.organisation_id" [value]="it.id">
+          <mat-label>field_1</mat-label>
+          <mat-select formControlName="field_1_id" required>
+            <mat-option *ngFor="let it of __ddl?.field_1_id" [value]="it.id">
               {{ it.title }}
             </mat-option>
           </mat-select>
-          <mat-error>{{ _error_FormArray(item, 'organisation_id')?.message }}</mat-error>
+          <mat-error>{{ _error_FormArray(item, 'field_1_id')?.message }}</mat-error>
         </mat-form-field>
       </div>
       <div class="col-md-3 p-0">
         <mat-form-field appearance="outline" class="col-md-12">
-          <mat-label>System</mat-label>
-          <mat-select formControlName="system_id" required>
-            <mat-option *ngFor="let it of __ddl?.system_id" [value]="it.id">
+          <mat-label>field_2</mat-label>
+          <mat-select formControlName="field_2_id" required>
+            <mat-option *ngFor="let it of __ddl?.field_2_id" [value]="it.id">
               {{it.title}}
             </mat-option>
           </mat-select>
-          <mat-error>{{ _error_FormArray(item, 'system_id')?.message }}</mat-error>
+          <mat-error>{{ _error_FormArray(item, 'field_2_id')?.message }}</mat-error>
         </mat-form-field>
       </div>
       <div class="col-md-3 p-0">
         <mat-form-field appearance="outline" class="col-md-12">
-          <mat-label>Prefix</mat-label>
-          <input matInput type="text" formControlName="prefix">
+          <mat-label>field_3</mat-label>
+          <input matInput type="text" formControlName="field_3">
           <mat-error>
-            {{ _error_FormArray(item, 'prefix')?.message }}
+            {{ _error_FormArray(item, 'field_3')?.message }}
           </mat-error>
         </mat-form-field>
       </div>
       <div class="col-md-3 p-0">
         <div class="col-md-12 d-flex justify-content-lg-start justify-content-sm-end">
-          <button type="button" [disabled]="!(customizations.length > 1)"
+          <button type="button" [disabled]="!(array_groups.length > 1)"
             class="btn btn-sm btn-outline-danger my-2" (click)="rmvCustom(i)">Remove</button>
           <button type="button"
-            [disabled]="!(item.valid && _form.get('customization').valid && customizations?.length == (i + 1))"
-            [ngStyle]="{'display':customizations?.length == (i + 1)? 'inline' : 'none'}"
+            [disabled]="!(item.valid && _form.get('array_group').valid && array_groups?.length == (i + 1))"
+            [ngStyle]="{'display':array_groups?.length == (i + 1)? 'inline' : 'none'}"
             class="btn btn-sm btn-outline-info my-2" (click)="addCustom()">Add</button>
         </div>
       </div>
