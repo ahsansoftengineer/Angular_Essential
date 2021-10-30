@@ -321,39 +321,6 @@
     );
   }
 ```
-#### Hiarchycal Dropdowns (TS)
-```javascript
-  _ddIncrement = 0;
-  _totalDropdown = 0;
-  __ddl: any = {};
-  _resetSubscription() {}
-  _dropdown(url: URLz, code: string = '') {
-    return Custom._dropdown(url, code, this._service);
-  }
-  _loadSubEntity(entity: URLz, code: string, event: MatOptionSelectionChange) {
-    this._ddIncrement++;
-    if (
-      event?.isUserInput ||
-      (this._activeId && this._totalDropdown >= this._ddIncrement)
-    ) {
-      if(event?.isUserInput){
-        switch (entity) {
-          case URLz.LE:
-            if (this._form.contains('b'))
-              this._form.get('b').setValue('');
-          case URLz.OU || URLz.LE:
-            if (this._form.contains('c'))
-              this._form.get('c').setValue('');
-          case URLz.OU || URLz.SU || URLz.LE:
-            if (this._form.contains('d'))
-              this._form.get('d').setValue('');
-            break;
-      }
-      }
-      Custom.loadSubEntity(entity, code, this.__ddl, this._service);
-    }
-  }
-```
 #### Hiarchycal Dropdown (Template)
 ```html
   <div class="col-md-4 p-0">
@@ -395,6 +362,39 @@
     <mat-error>{{_error('c')?.message}}</mat-error>
   </mat-form-field>
 </div>
+```
+#### Hiarchycal Dropdowns (TS)
+```javascript
+  _ddIncrement = 0;
+  _totalDropdown = 0;
+  __ddl: any = {};
+  _resetSubscription() {}
+  _dropdown(url: URLz, code: string = '') {
+    return Custom._dropdown(url, code, this._service);
+  }
+  _loadSubEntity(entity: URLz, code: string, event: MatOptionSelectionChange) {
+    this._ddIncrement++;
+    if (
+      event?.isUserInput ||
+      (this._activeId && this._totalDropdown >= this._ddIncrement)
+    ) {
+      if(event?.isUserInput){
+        switch (entity) {
+          case URLz.LE:
+            if (this._form.contains('b'))
+              this._form.get('b').setValue('');
+          case URLz.OU || URLz.LE:
+            if (this._form.contains('c'))
+              this._form.get('c').setValue('');
+          case URLz.OU || URLz.SU || URLz.LE:
+            if (this._form.contains('d'))
+              this._form.get('d').setValue('');
+            break;
+      }
+      }
+      Custom.loadSubEntity(entity, code, this.__ddl, this._service);
+    }
+  }
 ```
 #### Hiarchycal Dropdown (Custom File)
 1. why we are passing service as a argument when ever we could have Service Inject Directly Here
