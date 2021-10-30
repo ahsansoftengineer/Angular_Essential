@@ -1,5 +1,5 @@
 ## Base Service Implementation
-#### get
+### GET
 > * This doesn't have to be generic type because its not in use
 > * Instead use another way round for its Generics Functionality
 ```javascript
@@ -17,7 +17,7 @@
   // Component ngOnInit
     this.patchData();
 ```
-##### 1. Without Optional Parameters
+#### 1. Without Optional Parameters
 ```javascript
   patchData(){
     if (this._activeId != null && Number(this._activeId) > 0)
@@ -30,7 +30,7 @@
       });
   }
 ```
-##### 2. With Optional Parameters
+#### 2. With Optional Parameters
 ```javascript
   patchData(){
     this._service
@@ -47,7 +47,7 @@
       }
     }
 ```
-#### gets
+### GETS
 > * No need Generics Type
 ```javascript
   @LoaderEnabled()
@@ -76,7 +76,7 @@
     });
   }
 ```
-##### 3. Create / Update
+#### 3. Create / Update
 > * with & without parameters
 ```javascript
   @LoaderEnabled()
@@ -167,7 +167,7 @@
     }
   }
 ```
-#### delete
+### DELETE
 > * Here we are not using official delete method of Http Client
 ```javascript
   @LoaderEnabled()
@@ -175,17 +175,17 @@
     return this.http.post(this.url + '/' + id + '?_method=DELETE' + param, id);
   }
 ```
-##### 1. Calling Delete Method from Template
+#### 1. Calling Delete Method from Template
 ```html
 <i class="ti-trash text-danger pointer" (click)="_delete(item.id)"></i>
 ```
-##### 2. Calling Delete Method from Base Class
+#### 2. Calling Delete Method from Base Class
 ```javascript
   _delete(id: number) {
     Custom.SwalFireDelete(this._service, this._component, id);
   }
 ```
-##### 3. Custom Swal Fire Delete Implementation
+#### 3. Custom Swal Fire Delete Implementation
 ```javascript
   public static statusEmmit: EventEmitter<any> = new EventEmitter();
   public static async SwalFireDelete(
@@ -219,7 +219,7 @@
     });
   }
 ```
-##### 4. Subscribing the Status Change Event Emmitter 
+#### 4. Subscribing the Status Change Event Emmitter 
 > * Here we are subscribing the status changed so we could refresh when the Service Complete Execution 
 > * This is happening in Base List Class
 ```javascript
@@ -231,8 +231,7 @@
     this._refresh();
   }
 ```
-
-#### status
+### STATUS
 > * Status Changed is pretty much same as delete 
 ```javascript
   @LoaderEnabled()
@@ -240,7 +239,7 @@
     return this.http.post(this.url + '?_method=PATCH' + param, data);
   }
 ```
-##### 1. Component Template
+#### 1. Component Template
 ```html
 <td class="pl-3" mat-cell *matCellDef="let item">
   <ui-switch 
@@ -251,7 +250,7 @@
   </ui-switch>
 </td>
 ```
-##### 2. Base List Class
+#### 2. Base List Class
 ```javascript
   _statusChange(value: boolean, id: number) {
     this._status.activate = +value;
@@ -261,7 +260,7 @@
     );
   }
 ```
-##### 3. Custom Class
+#### 3. Custom Class
 ```javascript
   public static statusEmmit: EventEmitter<any> = new EventEmitter();
  public static async SwalFireStatusChange(
@@ -293,7 +292,7 @@
     });
   }
 ```
-##### 4. Base List Class Subscription
+#### 4. Base List Class Subscription
 ```javascript
   ngOnInit(){
     Custom.statusEmmit.subscribe(status => {
@@ -303,8 +302,7 @@
     this._refresh();
   }
 ```
-
-#### Drop down
+### DROPDOWN
 > * This is Used in Several Ways
 ```javascript
   @LoaderEnabled()
@@ -315,7 +313,125 @@
     );
   }
 ```
-##### Simple Dropdowns
+#### Simple Dropdowns
 ```javascript
-
+  initDropDown(){
+    this._dropdown(URLz.BG).subscribe(res =>
+      this.__ddl.bg = res.data.records
+    );
+  }
 ```
+#### Hiarchycal Dropdowns (TS)
+```javascript
+  _ddIncrement = 0;
+  _totalDropdown = 0;
+  __ddl: any = {};
+  _resetSubscription() {}
+  _dropdown(url: URLz, code: string = '') {
+    return Custom._dropdown(url, code, this._service);
+  }
+  _loadSubEntity(entity: URLz, code: string, event: MatOptionSelectionChange) {
+    this._ddIncrement++;
+    if (
+      event?.isUserInput ||
+      (this._activeId && this._totalDropdown >= this._ddIncrement)
+    ) {
+      if(event?.isUserInput){
+        switch (entity) {
+          case URLz.LE:
+            if (this._form.contains('b'))
+              this._form.get('b').setValue('');
+          case URLz.OU || URLz.LE:
+            if (this._form.contains('c'))
+              this._form.get('c').setValue('');
+          case URLz.OU || URLz.SU || URLz.LE:
+            if (this._form.contains('d'))
+              this._form.get('d').setValue('');
+            break;
+      }
+      }
+      Custom.loadSubEntity(entity, code, this.__ddl, this._service);
+    }
+  }
+```
+#### Hiarchycal Dropdown (Template)
+```html
+  <div class="col-md-4 p-0">
+  <mat-form-field appearance="outline" class="col-md-12">
+    <mat-label>A</mat-label>
+    <mat-select formControlName="a" required>
+      <mat-option
+      (onSelectionChange)="_loadSubEntity(URLz.B, item.id, $event, 4)"
+      *ngFor="let item of __ddl?.a" [value]="item.id">
+        {{item.title}}
+      </mat-option>
+    </mat-select>
+    <mat-error>{{_error('a')?.message}}</mat-error>
+  </mat-form-field>
+</div>
+<div class="col-md-4 p-0">
+  <mat-form-field appearance="outline" class="col-md-12">
+    <mat-label>B</mat-label>
+    <mat-select formControlName="b" required>
+      <mat-option
+      (onSelectionChange)="_loadSubEntity(URLz.C, item.id, $event, 4)"
+      *ngFor="let item of __ddl?.b" [value]="item.id">
+        {{item.title}}
+      </mat-option>
+    </mat-select>
+    <mat-error>{{_error('b')?.message}}</mat-error>
+  </mat-form-field>
+</div>
+<div class="col-md-4 p-0">
+  <mat-form-field appearance="outline" class="col-md-12">
+    <mat-label>C</mat-label>
+    <mat-select formControlName="c" required>
+      <mat-option
+      (onSelectionChange)="_loadSubEntity(URLz.D, item.id, $event, 4)"
+      *ngFor="let item of __ddl?.c" [value]="item.id">
+        {{item.title}}
+      </mat-option>
+    </mat-select>
+    <mat-error>{{_error('c')?.message}}</mat-error>
+  </mat-form-field>
+</div>
+```
+#### Hiarchycal Dropdown (Custom File)
+1. why we are passing service as a argument when ever we could have Service Inject Directly Here
+2. Also Set the Form Value Empty Here
+```javascript
+ public static loadSubEntity(entity: URLz, code, __ddl, service) {
+    if (code?.target?.value) {
+      code = code?.target?.value;
+    }
+    if (entity == URLz.B) {
+      this._dropdown(entity, code, service).subscribe(
+        (res) => (__ddl.b = res.data.records)
+      );
+      __ddl.c = [];
+      __ddl.d = [];
+    } else if (entity == URLz.C) {
+      this._dropdown(entity, code, service).subscribe(
+        (res) => (__ddl.c = res.data.records)
+      );
+      __ddl.d = [];
+    } else if (entity == URLz.D) {
+      this._dropdown(entity, code, service).subscribe(
+        (res) => {
+          __ddl.d = res.data.records
+        }
+      );
+    }
+  }
+  public static _dropdown(url: URLz, code, service) {
+    return service.selectOptionService(url, code);
+  }
+```
+
+
+
+
+
+
+
+
