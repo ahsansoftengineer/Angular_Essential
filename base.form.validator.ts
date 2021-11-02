@@ -6,44 +6,34 @@ import {
   FormGroup,
   ValidationErrors,
 } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { GlobalConfig, ToastrService } from 'ngx-toastr';
-import { Alert } from '../interface/alert';
 import { Server_Response } from '../interface/errors';
 import { ImgType } from '../interface/img-type';
-import {
-  Alpha,
-  AlphaNum,
-  Email,
-  Num,
-  Password,
-  specialChars,
-} from './base.constants';
+import { RegExps } from '../regex';
 
 // In Base Class append all the properties / methods with _ (underscore)
 export abstract class BaseFormValidator {
-  // This Property Initialized by Components
-  _form: FormGroup;
-  // protected formSubmitted: boolean = false;
-  _submitted: boolean = false;
-  _isFormValid: boolean = false;
   _fb: FormBuilder;
+  _form: FormGroup;
+  _submitted = false;
+  _isFormValid = false;
   _toastr:ToastrService
   _options: GlobalConfig;
   constructor(protected injector: Injector) {
     this._fb = injector.get(FormBuilder);
     this._toastr = injector.get(ToastrService)
   }
-  _error_control(control : FormControl){
-    if(control.errors){
-      return control?.errors['ERROR']
-    } else return null
-  }
+  // Below Method is to Display Error Messages
   _error(name: string): ValidationErrors {
     let control = this._form?.controls[name]
     if (control?.touched && control.errors) {
       return control.errors['ERROR'];
     };
+  }
+  _error_control(control : FormControl){
+    if(control.errors){
+      return control?.errors['ERROR']
+    } else return null
   }
   _error_image(img: ImgType){
     if(img.error === true){
@@ -76,7 +66,7 @@ export abstract class BaseFormValidator {
   }
   _error_FormArray(internalGroup: FormGroup, control: string){
     let controlz = internalGroup?.get(control)
-    if (controlz?.errors) {
+    if (controlz?.touched && controlz?.errors) {
       return controlz.errors['ERROR']
     } else return null
   }
@@ -87,6 +77,7 @@ export abstract class BaseFormValidator {
       return fg.get(control)?.errors['ERROR'];
     } return null
   }
+  // Below Methods is to Add Validation to Control
   /**
     Global Validator
     1. Required Name Display
@@ -131,7 +122,7 @@ export abstract class BaseFormValidator {
           return {
             ERROR: { key: 'required', message: 'Please select ' + field_name },
           };
-      } else {
+      } else if(a !== '') {
         if (min != 0 && a?.length < min)
           return {
             ERROR: {
@@ -160,42 +151,49 @@ export abstract class BaseFormValidator {
               message: 'Maximum value ' + maxVal + ' allowed',
             },
           };
-        else if (num != 0 && !Num.test(a))
+        else if (num != 0 && !RegExps.NUM.test(a))
           return {
             ERROR: {
               key: 'NUM',
               message: 'Only numbers allowed',
             },
           };
-        else if (alpha != 0 && !Alpha.test(a))
+        else if (num != 0 && !RegExps.POSITIVENUM.test(a))
+          return {
+            ERROR: {
+              key: 'NUM',
+              message: 'Only positive numbers allowed',
+            },
+          };
+        else if (alpha != 0 && !RegExps.ALPHA.test(a))
           return {
             ERROR: {
               key: 'ALPHA',
               message: 'Only alphabets allowed',
             },
           };
-        else if (alphaNum != 0 && !AlphaNum.test(a))
+        else if (alphaNum != 0 && !RegExps.ALPHANUM.test(a))
           return {
             ERROR: {
               key: 'ALPHANUM',
               message: 'Only alphabets and numbers allowed',
             },
           };
-        else if (specialChar != 0 && specialChars.test(a))
+        else if (specialChar != 0 && RegExps.SPECIALCHARS.test(a))
           return {
             ERROR: {
               key: 'PATTERN',
               message: 'Special character not allowed',
             },
           };
-        else if (email != 0 && !Email.test(a))
+        else if (email != 0 && !RegExps.EMAIL.test(a))
           return {
             ERROR: {
               key: 'EMAIL',
               message: 'Invalid email containing “@, .com”',
             },
           };
-        else if (password != 0 && !Password.test(a))
+        else if (password != 0 && !RegExps.PASSWORD.test(a))
           return {
             ERROR: {
               key: 'PASSWORD',
@@ -206,7 +204,7 @@ export abstract class BaseFormValidator {
       }
     };
   }
-  // Only for Customization
+  // Stop Duplication of FormGroup in FormArray
   _groupValidator(field1: string, field2: string, arrayName: string) {
     return (
       group: FormGroup
