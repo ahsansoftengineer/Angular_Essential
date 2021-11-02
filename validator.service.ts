@@ -31,7 +31,7 @@ export class ValidatorService {
       return control.errors['ERROR'];
     }
   }
-  x_error_control(control: FormControl) {
+  _error_control(control: FormControl) {
     if (control.errors) {
       return control?.errors['ERROR'];
     } else return null;
